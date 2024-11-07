@@ -26,8 +26,8 @@ db.sequelize.authenticate().then(() => {
         const appName = process.env.APP_NAME
         const port = process.env.APP_PORT
         console.log('%s is starting on %d', appName, port)
-        const laneaxisServer = app.listen(port)
-        laneaxisServer.on('error', (err) => {
+        const server = app.listen(port)
+        server.on('error', (err) => {
            
         })
     }).catch((err) => {
