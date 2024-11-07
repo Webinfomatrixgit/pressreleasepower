@@ -1,10 +1,11 @@
 // Import section
 require('dotenv').config();
+const models = require('../db/models')
 const Joi = require('joi')
 const joiToForms = require('joi-errors-for-forms').form
+const changeCaseObject = require('change-case-object')
 const jwt = require('jsonwebtoken')
 const md5 = require('md5')
-
 
 module.exports.login = async function (req, res) {
 
@@ -30,13 +31,11 @@ module.exports.login = async function (req, res) {
         const validationError = convertToForms(validateValue.error)
 
         if (validationError) {
-
             return res.status(200).json({
                 success: false,
                 message: "validation error"
             })
         }
-
         const validatedValues = changeCaseObject.snakeCase(validateValue.value)
 
         // find user by email
@@ -51,6 +50,7 @@ module.exports.login = async function (req, res) {
         }
         try {
             models.User.findAll(findUserOptions).then(data => {
+                
                 if (data.length > 0) {
                     const userPayload = {
                         email: data[0].email,
@@ -70,9 +70,15 @@ module.exports.login = async function (req, res) {
                         message: 'login successfull',
                         response: aToken
                     })
+                }else{
+                    res.status(200).json({
+                        success: false,
+                        message: 'user not found'
+                    })
                 }
             })
         } catch (error) {
+            
             res.status(401).json({
                 success: false,
                 message: `database error: ${error}`
@@ -81,7 +87,7 @@ module.exports.login = async function (req, res) {
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: error
+            message: `${error}`
         })
     }
 }
