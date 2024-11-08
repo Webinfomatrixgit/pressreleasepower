@@ -11,12 +11,13 @@ module.exports.login = async function (req, res) {
 
     try {
         const bodyData = req.body
+
         // Validation part 
         const validatedObject = Joi.object({
-
             email: Joi.string().email().insensitive().lowercase().required(),
             password: Joi.string().min(5).max(16).required(),
         })
+
         /* validating the validation values */
         const validateValue = validatedObject.validate({
             email: bodyData.email,
@@ -38,11 +39,10 @@ module.exports.login = async function (req, res) {
         }
         const validatedValues = changeCaseObject.snakeCase(validateValue.value)
 
-        // find user by email
-
+        // find user by email or password
         const findUserOptions = {
             raw: true,
-            attributes: ['email','id','user_type'],
+            attributes: ['email', 'id', 'user_type'],
             where: {
                 email: validatedValues.email,
                 password: md5(validatedValues.password)
@@ -50,15 +50,12 @@ module.exports.login = async function (req, res) {
         }
         try {
             models.User.findAll(findUserOptions).then(data => {
-                
-                
                 if (data.length > 0) {
                     const userPayload = {
                         email: data[0].email,
                         userId: data[0].id,
                         role: data[0].user_type
                     }
-                    console.log(data, 'data')
                     const aToken = jwt.sign(
                         userPayload,
                         process.env.JWT_SECRET_KEY,
@@ -72,7 +69,7 @@ module.exports.login = async function (req, res) {
                         message: 'login successfull',
                         response: aToken
                     })
-                }else{
+                } else {
                     res.status(200).json({
                         success: false,
                         message: 'user not found'
@@ -80,7 +77,6 @@ module.exports.login = async function (req, res) {
                 }
             })
         } catch (error) {
-            
             res.status(401).json({
                 success: false,
                 message: `database error: ${error}`
