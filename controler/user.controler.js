@@ -4,7 +4,6 @@ const Joi = require('joi')
 const joiToForms = require('joi-errors-for-forms').form
 const changeCaseObject = require('change-case-object')
 
-
 // user Get API
 module.exports.userGet = async function (req, res) {
     try {
@@ -99,8 +98,9 @@ module.exports.userDelete = async function (req, res) {
     }
 }
 
-
+// user update API
 module.exports.userUpdate = async function (req,  res){
+    // handle exception error
     try{
         const userId = parseInt(req.query.userId)
         const bodyData = req.body
@@ -153,7 +153,7 @@ module.exports.userUpdate = async function (req,  res){
                 })
             }
         }
-
+        //Handle for database error
         try{
             models.User.update(validatedValues, {where: {id: userId}}).then(data => {
                 console.log(data[0],'updated data')
