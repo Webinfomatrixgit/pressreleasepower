@@ -1,84 +1,54 @@
-// Import section
 require('dotenv').config();
 const models = require('../db/models')
 const Joi = require('joi')
 const joiToForms = require('joi-errors-for-forms').form
 const changeCaseObject = require('change-case-object')
-const jwt = require('jsonwebtoken')
-const md5 = require('md5')
 
-module.exports.login = async function (req, res) {
 
+// user Get API
+module.exports.userGet = async function (req, res) {
     try {
-        const bodyData = req.body
-        // Validation part 
-        const validatedObject = Joi.object({
-
-            email: Joi.string().email().insensitive().lowercase().required(),
-            password: Joi.string().min(5).max(16).required(),
-        })
-        /* validating the validation values */
-        const validateValue = validatedObject.validate({
-            email: bodyData.email,
-            password: bodyData.password
-        }, {
-            abortEarly: false
-        })
-
-        /* converts errors in key : value pair */
-        const convertToForms = joiToForms()
-
-        const validationError = convertToForms(validateValue.error)
-
-        if (validationError) {
-            return res.status(200).json({
-                success: false,
-                message: "validation error"
-            })
-        }
-        const validatedValues = changeCaseObject.snakeCase(validateValue.value)
-
-        // find user by email
-
-        const findUserOptions = {
-            raw: true,
-            attributes: ['email'],
-            where: {
-                email: validatedValues.email,
-                password: md5(validatedValues.password)
+        // Get page number from query params, default to 1 if not provided
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 8; // Set default limit to 8
+        const offset = (page - 1) * limit; // Calculate offset
+        const userId = parseInt(req.query.userId);
+        let findOption;
+        if(userId){
+            findOption = {
+                where: {
+                    id: userId 
+                },
+                limit,
+                offset
+            }
+        }else{
+            findOption = {
+                limit,
+                offset
             }
         }
-        try {
-            models.User.findAll(findUserOptions).then(data => {
-                
-                if (data.length > 0) {
-                    const userPayload = {
-                        email: data[0].email,
-                        userId: data[0].id,
-                        role: data[0].user_type
-                    }
-                    const aToken = jwt.sign(
-                        userPayload,
-                        process.env.JWT_SECRET_KEY,
-                        {
-                            subject: 'access',
-                            expiresIn: '7d'
-                        }
-                    )
+
+        try{
+            models.User.findAll(findOption).then(data=> {
+                if(data.length <1 ){
                     res.status(200).json({
                         success: true,
-                        message: 'login successfull',
-                        response: aToken
+                        message: 'record not found',
                     })
                 }else{
+                    data.map(record => {
+                        delete record.dataValues.password
+                    })
                     res.status(200).json({
-                        success: false,
-                        message: 'user not found'
+                        success: true,
+                        message: 'record fetch successfully....',
+                        response: data
                     })
                 }
+
             })
-        } catch (error) {
-            
+        }catch (error){
             res.status(401).json({
                 success: false,
                 message: `database error: ${error}`
@@ -87,7 +57,129 @@ module.exports.login = async function (req, res) {
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: `${error}`
+            message: `Exception error: ${error}`
+        })
+    }
+}
+
+// Delete User API
+module.exports.userDelete = async function (req, res) {
+    try{
+        const userId = parseInt(req.query.userId)
+
+        try{
+            models.User.destroy({
+                where: {
+                    id: userId
+                }
+            }).then(data => {
+                if(data == 0){
+                    res.status(401).json({
+                        success: false,
+                        message: 'record not found'
+                    })
+                }else{
+                    res.status(200).json({
+                        success: true,
+                        message: 'record deleted successfully....'
+                    })
+                }
+            })
+        }catch(error){
+            res.status(401).json({
+                success: false,
+                message: `database error: ${error}`
+            })
+        }
+    }catch(error){
+        res.status(500).json({
+            success: false,
+            message: `Exception error: ${error}`
+        })
+    }
+}
+
+
+module.exports.userUpdate = async function (req,  res){
+    try{
+        const userId = parseInt(req.query.userId)
+        const bodyData = req.body
+        const validatedObject = Joi.object({
+            firstName: Joi.string(),
+            lastName: Joi.string(),
+            email: Joi.string().email().insensitive().lowercase(),
+            password: Joi.string().min(5).max(16),
+            phone: Joi.string().regex(/[0-9]{10}/)
+        })
+
+        /* validating the validation values */
+        const validateValue = validatedObject.validate({
+            firstName: bodyData.firstName,
+            lastName: bodyData.lastName,
+            email: bodyData.email,
+            password: bodyData.password,
+            phone: bodyData.phone,
+        }, {
+            abortEarly: false
+        })
+
+        /* converts errors in key : value pair */
+        const convertToForms = joiToForms([
+            {
+                regex: '/[0-9]{10}/',
+                message: '"${key}" must be a valid 10 digit contact number.'
+            },
+            {
+                regex: '/[0-9]/',
+                message: '"${key}" must be a number.'
+            }
+        ])
+        const validationError = convertToForms(validateValue.error)
+
+        if (validationError) {
+
+            return res.status(200).json({
+                success: false,
+                message: "validation error"
+            })
+        }
+        const validatedValues = changeCaseObject.snakeCase(validateValue.value)
+        if (validatedValues.phone) {
+            /* checking phone number's valid digits */
+            if (validatedValues.phone.length != 10) {
+                return res.status(200).json({
+                    success: false,
+                    message: validatedValues.phone + ' Please check your phone number'
+                })
+            }
+        }
+
+        try{
+            models.User.update(validatedValues, {where: {id: userId}}).then(data => {
+                console.log(data[0],'updated data')
+                if(data[0] < 1 ) {
+                    res.status(401).json({
+                        success:false,
+                        message: 'record not found'
+                    })
+                }else{
+                    res.status(200).json({
+                        success: true,
+                        message: 'record updated successfully'
+                    })
+                }
+            })
+        }catch(error){
+            res.status(401).json({
+                success: false,
+                message: `database error: ${error}`
+            })
+        }
+
+    }catch(error) {
+        res.status(500).json({
+            success: false,
+            message: `Exception error: ${error}`
         })
     }
 }

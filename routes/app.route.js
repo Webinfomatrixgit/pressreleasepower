@@ -1,7 +1,8 @@
 // IMPORT SECTION
 const express = require('express')
 const multer = require('multer')
-const authControler = require('../controler/user.controler')
+const authControler = require('../controler/auth.controler')
+const userControler = require('../controler/user.controler')
 
 // VARIABLE DECLARATION SECTION
 const router = express.Router()
@@ -18,6 +19,11 @@ const multipleUpload = multer({ storage }).fields([
 
 // auth 
 router.post('/login', authControler.login)
+
+// user API
+router.get('/user', userControler.userGet)
+router.delete('/user', userControler.userDelete)
+router.put('/user', userControler.userUpdate)
 
 
 
