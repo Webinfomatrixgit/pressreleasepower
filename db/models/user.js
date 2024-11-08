@@ -71,10 +71,4 @@ module.exports.UserType = {
     USER: 'USER'
 }
 
-module.exports.UserStatus = {
-    ACTIVE: 0,
-    ACH_PAYMENT_FAILED: 1,
-    LANEAXIS_DISABLE: 2,
-    SELF_DELETE: 3
-}
 

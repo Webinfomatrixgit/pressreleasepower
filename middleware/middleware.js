@@ -19,16 +19,17 @@ const checkToken = (req, res, next) => {
                 delete err.stack
                 return res.status(401).json({
                     success: false,
-                    message: errorMessages.AUTH_TOKEN_IS_NOT_VALID
+                    message: 'AUTH TOKEN IS NOT VALID'
                 })
             } else {
+                req.decoded = decoded
                 next()
             }
         })
     } else {
         return res.status(401).json({
             success: false,
-            message: errorMessages.AUTH_TOKEN_IS_NOT_SUPPLIED
+            message: 'AUTH TOKEN NOT SUPPLY'
         })
     }
 }

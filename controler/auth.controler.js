@@ -42,7 +42,7 @@ module.exports.login = async function (req, res) {
 
         const findUserOptions = {
             raw: true,
-            attributes: ['email'],
+            attributes: ['email','id','user_type'],
             where: {
                 email: validatedValues.email,
                 password: md5(validatedValues.password)
@@ -51,12 +51,14 @@ module.exports.login = async function (req, res) {
         try {
             models.User.findAll(findUserOptions).then(data => {
                 
+                
                 if (data.length > 0) {
                     const userPayload = {
                         email: data[0].email,
                         userId: data[0].id,
                         role: data[0].user_type
                     }
+                    console.log(data, 'data')
                     const aToken = jwt.sign(
                         userPayload,
                         process.env.JWT_SECRET_KEY,
