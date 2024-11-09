@@ -3,6 +3,7 @@ const express = require('express')
 const multer = require('multer')
 const authControler = require('../controler/auth.controler')
 const userControler = require('../controler/user.controler')
+const packageControler = require('../controler/package.controler')
 const middleware = require('../middleware/middleware')
 const role = require('../middleware/role')
 const models = require('../db/models')
@@ -29,7 +30,11 @@ router.get('/user', [middleware.checkToken, role.hasRole(superAdminAccess)] ,use
 router.delete('/user', [middleware.checkToken, role.hasRole(superAdminAccess)], userControler.userDelete)
 router.put('/user', [middleware.checkToken, role.hasRole(superAdminAccess)], userControler.userUpdate)
 
-
+// Package API
+router.post('/package', [middleware.checkToken, role.hasRole(superAdminAccess)], packageControler.packageCreate)
+router.get('/package',[middleware.checkToken, role.hasRole(superAdminAccess)], packageControler.packageGet)
+router.put('/package', [middleware.checkToken, role.hasRole(superAdminAccess)], packageControler.packageEdit)
+router.delete('/package', [middleware.checkToken, role.hasRole(superAdminAccess)], packageControler.packageDelete)
 
 module.exports = router
 
