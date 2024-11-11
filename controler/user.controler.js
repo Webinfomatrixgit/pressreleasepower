@@ -27,7 +27,6 @@ module.exports.userGet = async function (req, res) {
                 offset
             }
         }
-
         try{
             models.User.findAll(findOption).then(data=> {
                 if(data.length <1 ){
@@ -45,7 +44,6 @@ module.exports.userGet = async function (req, res) {
                         response: data
                     })
                 }
-
             })
         }catch (error){
             res.status(401).json({
@@ -122,7 +120,6 @@ module.exports.userUpdate = async function (req,  res){
         }, {
             abortEarly: false
         })
-
         /* converts errors in key : value pair */
         const convertToForms = joiToForms([
             {

@@ -49,6 +49,7 @@ module.exports.login = async function (req, res) {
             }
         }
         try {
+            console.log(md5(validatedValues.password), "password")
             models.User.findAll(findUserOptions).then(data => {
                 if (data.length > 0) {
                     const userPayload = {

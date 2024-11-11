@@ -4,22 +4,22 @@ const Joi = require('joi')
 const joiToForms = require('joi-errors-for-forms').form
 const changeCaseObject = require('change-case-object')
 
-//package create API
-module.exports.packageCreate = async function (req, res) {
+//categories create API
+module.exports.categoriesCreate = async function (req, res) {
     try {
         const bodyData = req.body
         const validatedObject = Joi.object({
             name: Joi.string().required(),
-            price: Joi.string().required(),
-            label: Joi.string().required(),
+            slug: Joi.string().required(),
+            code: Joi.string().required(),
             status: Joi.boolean().required()
         })
 
         /* validating the validation values */
         const validateValue = validatedObject.validate({
             name: bodyData.name,
-            price: bodyData.price,
-            label: bodyData.label,
+            slug: bodyData.price,
+            code: bodyData.label,
             status: bodyData.status
         }, {
             abortEarly: false
@@ -30,6 +30,7 @@ module.exports.packageCreate = async function (req, res) {
         const validationError = convertToForms(validateValue.error)
 
         if (validationError) {
+
             return res.status(200).json({
                 success: false,
                 message: `validation error: ${validationError}`
@@ -37,14 +38,13 @@ module.exports.packageCreate = async function (req, res) {
         }
         const validatedValues = changeCaseObject.snakeCase(validateValue.value)
         try {
-            models.Package.create(validatedValues).then(data => {
+            models.Categories.create(validatedValues).then(data => {
                 res.status(200).json({
                     success: true,
-                    message: 'package created successfully...',
+                    message: `categories created successfully`,
                     response: data
                 })
             })
-
         } catch (error) {
             res.status(401).json({
                 success: false,
@@ -60,30 +60,54 @@ module.exports.packageCreate = async function (req, res) {
     }
 }
 
-// package Get API
-module.exports.packageGet = async function (req, res) {
+//categories get API
+
+module.exports.categoriesGet = async function (req, res) {
     try {
+        // Get page number from query params, default to 1 if not provided
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 8; // Set default limit to 8
+        const offset = (page - 1) * limit; // Calculate offset
+        const categoryId = parseInt(req.query.categoryId);
+        let findOption;
+        if (categoryId) {
+            findOption = {
+                where: {
+                    id: categoryId
+                },
+                limit,
+                offset
+            }
+        } else {
+            findOption = {
+                limit,
+                offset
+            }
+        }
         try {
-            models.Package.findAll().then(data => {
-                if (data.length < 1) {
+            models.Categories.findAll(findOption).then(data => {
+                if (data.length > 0) {
                     res.status(200).json({
                         success: true,
-                        message: 'record not found',
+                        message: `categories fetched successfully`,
+                        response: data
                     })
                 } else {
                     res.status(200).json({
                         success: true,
-                        message: 'record fetch successfully....',
+                        message: `categories not found`,
                         response: data
                     })
                 }
             })
+
         } catch (error) {
             res.status(401).json({
                 success: false,
                 message: `database error: ${error}`
             })
         }
+
     } catch (error) {
         res.status(500).json({
             success: false,
@@ -92,23 +116,22 @@ module.exports.packageGet = async function (req, res) {
     }
 }
 
-//Package edit API
-module.exports.packageUpdate = async function (req, res) {
+module.exports.categoriesUpdate = async function (req, res) {
     try {
-        const packageId = parseInt(req.query.id)
+        const categoryId = parseInt(req.query.categoryId);
         const bodyData = req.body
         const validatedObject = Joi.object({
             name: Joi.string(),
-            price: Joi.string(),
-            label: Joi.string(),
+            slug: Joi.string(),
+            code: Joi.string(),
             status: Joi.boolean()
         })
 
         /* validating the validation values */
         const validateValue = validatedObject.validate({
             name: bodyData.name,
-            price: bodyData.price,
-            label: bodyData.label,
+            slug: bodyData.price,
+            code: bodyData.label,
             status: bodyData.status
         }, {
             abortEarly: false
@@ -119,23 +142,24 @@ module.exports.packageUpdate = async function (req, res) {
         const validationError = convertToForms(validateValue.error)
 
         if (validationError) {
+
             return res.status(200).json({
                 success: false,
-                message: "validation error"
+                message: `validation error: ${validationError}`
             })
         }
         const validatedValues = changeCaseObject.snakeCase(validateValue.value)
+
         try {
-            if (isNaN(packageId)) {
+            console.log(isNaN(categoryId), 'categoryId')
+            if(isNaN(categoryId)){
                 res.status(401).json({
-                    success: false,
-                    message: 'package id not provided',
+                    success:false,
+                    message: 'category id not provided'
                 })
-            } else {
-                models.Package.update(validatedValues, {
-                    where: {
-                        id: packageId
-                    }
+            }else{
+                models.Categories.update(validatedValues, {
+                    where: { id: categoryId }
                 }).then(data => {
                     if (data[0] < 1) {
                         res.status(200).json({
@@ -151,6 +175,7 @@ module.exports.packageUpdate = async function (req, res) {
                     }
                 })
             }
+            
         } catch (error) {
             res.status(401).json({
                 success: false,
@@ -164,45 +189,3 @@ module.exports.packageUpdate = async function (req, res) {
         })
     }
 }
-
-//Package delete API
-
-module.exports.packageDelete = async function (req, res) {
-    try {
-        const packageId = parseInt(req.query.id)
-        try {
-            models.Package.destroy({
-                where: {
-                    id: packageId
-                }
-            }).then(data => {
-                if (data < 1) {
-                    res.status(200).json({
-                        success: true,
-                        message: 'record not found',
-                    })
-                } else {
-                    res.status(200).json({
-                        success: true,
-                        message: 'record deleted successfully....',
-                        response: data
-                    })
-                }
-            })
-        } catch (error) {
-            res.status(401).json({
-                success: false,
-                message: `database error: ${error}`
-            })
-        }
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: `Exception error: ${error}`
-        })
-    }
-}
-
-
-
-

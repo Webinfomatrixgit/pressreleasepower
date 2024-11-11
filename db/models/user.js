@@ -15,11 +15,17 @@ const attributes = {
         autoIncrement: true,
         allowNull: false
     },
+    title: {
+        type: Sequelize.STRING(100)
+    },
     first_name: {
         type: Sequelize.STRING(100)
     },
     last_name: {
         type: Sequelize.STRING(100)
+    },
+    username: {
+        type: Sequelize.STRING(50)
     },
     email: {
         type: Sequelize.STRING(100),
@@ -28,28 +34,77 @@ const attributes = {
             isEmail: true
         }
     },
+    image: {
+        type: Sequelize.STRING(191),
+    },
     phone: {
         type: Sequelize.STRING(15)
     },
+    website: {
+        type: Sequelize.STRING(255)
+    },
+    facebook: {
+        type: Sequelize.STRING(255)
+    },
+    twiter: {
+        type: Sequelize.STRING(255)
+    },
+    linkedin: {
+        type: Sequelize.STRING(255)
+    },
+    about: {
+        type: Sequelize.STRING(255)
+    },
     password: {
+        type: Sequelize.STRING(191)
+    },
+    remember_token: {
         type: Sequelize.STRING(100)
     },
-    email_otp: {
-        type: Sequelize.STRING(20)
+    package: {
+        type: Sequelize.STRING(255)
     },
-    phone_otp: {
-        type: Sequelize.STRING(20)
+    package_id: {
+        type: Sequelize.BIGINT,
     },
-    email_verified: {
-        type: Sequelize.BOOLEAN,
-        defaultValue: false
+    company_id: {
+        type: Sequelize.BIGINT,
     },
-    phone_verified: {
-        type: Sequelize.BOOLEAN,
-        defaultValue: false
+    pr: {
+        type: Sequelize.BIGINT,
+    },
+    wr: {
+        type: Sequelize.BIGINT,
+    },
+    vpr: {
+        type: Sequelize.BIGINT,
+    },
+    event: {
+        type: Sequelize.BIGINT,
+    },
+    duration: {
+        type: Sequelize.BIGINT,
+    },
+    noofpr: {
+        type: Sequelize.BIGINT,
+    },
+    last_login: {
+        type: Sequelize.DATE
+    },
+    last_login_ip: {
+        type: Sequelize.STRING(100)
+    },
+    verified: {
+        type: Sequelize.SMALLINT
+    },
+    is_newsletter: {
+        type: Sequelize.SMALLINT
+    },
+    status: {
+        type: Sequelize.BOOLEAN
     },
     user_type: {
-        type: Sequelize.STRING(50)
+        type: Sequelize.STRING(100)
     }
 }
 
