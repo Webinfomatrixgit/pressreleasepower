@@ -6,7 +6,8 @@ const userControler = require('../controler/user.controler')
 const packageControler = require('../controler/package.controler')
 const categorieControler = require('../controler/categories.controler')
 const companiesControler = require('../controler/companies.controler')
-const prControler = require('../controler/pr.controler')
+const videoPrControler = require('../controler/pr.controler')
+const articleControler = require('../controler/article.controler')
 const couponControler = require('../controler/coupon.controler')
 const middleware = require('../middleware/middleware')
 const role = require('../middleware/role')
@@ -30,7 +31,7 @@ const superAdminAccess = [models.User.UserType.SUPER_ADMIN]
 router.post('/login', authControler.login)
 
 // user APIs
-router.get('/user', [middleware.checkToken, role.hasRole(superAdminAccess)] ,userControler.userGet)
+router.get('/user', [middleware.checkToken, role.hasRole(superAdminAccess)], userControler.userGet)
 router.delete('/user', [middleware.checkToken, role.hasRole(superAdminAccess)], userControler.userDelete)
 router.put('/user', [middleware.checkToken, role.hasRole(superAdminAccess)], userControler.userUpdate)
 
@@ -51,16 +52,23 @@ router.post('/company', [middleware.checkToken, role.hasRole(superAdminAccess)],
 router.put('/company', [middleware.checkToken, role.hasRole(superAdminAccess)], companiesControler.companyUpdate)
 router.delete('/company', [middleware.checkToken, role.hasRole(superAdminAccess)], companiesControler.companyDelete) 
 
+// Article APIs
+router.get('/article', [middleware.checkToken, role.hasRole(superAdminAccess)], articleControler.articleGet)
+router.post('/article', [middleware.checkToken, role.hasRole(superAdminAccess)], articleControler.articleCreate)
+router.put('/article', [middleware.checkToken, role.hasRole(superAdminAccess)], articleControler.articleUpdate)
+router.delete('/article', [middleware.checkToken, role.hasRole(superAdminAccess)], articleControler.articleDelete)
+
 // pr APIs
-router.get('/videopr', [middleware.checkToken, role.hasRole(superAdminAccess)], prControler.videoPrGet)
-router.delete('/videopr', [middleware.checkToken, role.hasRole(superAdminAccess)], prControler.videoPrDelete)
-router.put('/videopr', [middleware.checkToken, role.hasRole(superAdminAccess)], prControler.videoPrUpdate)
-router.post('/videopr', [middleware.checkToken, role.hasRole(superAdminAccess)], prControler.videoPrCreate)
+router.get('/videopr', [middleware.checkToken, role.hasRole(superAdminAccess)], videoPrControler.videoPrGet)
+router.delete('/videopr', [middleware.checkToken, role.hasRole(superAdminAccess)], videoPrControler.videoPrDelete)
+router.put('/videopr', [middleware.checkToken, role.hasRole(superAdminAccess)], videoPrControler.videoPrUpdate)
+router.post('/videopr', [middleware.checkToken, role.hasRole(superAdminAccess)], videoPrControler.videoPrCreate)
 
 // coupon APIs
 router.get('/coupon', [middleware.checkToken, role.hasRole(superAdminAccess)], couponControler.couponGet)
 router.delete('/coupon', [middleware.checkToken, role.hasRole(superAdminAccess)],couponControler.couponDelete)
 router.put('/coupon', [middleware.checkToken, role.hasRole(superAdminAccess)],couponControler.couponUpdate)
 router.post('/coupon', [middleware.checkToken, role.hasRole(superAdminAccess)],couponControler.couponCreate)
+
 
 module.exports = router

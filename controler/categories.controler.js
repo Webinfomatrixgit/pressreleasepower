@@ -151,7 +151,6 @@ module.exports.categoriesUpdate = async function (req, res) {
         const validatedValues = changeCaseObject.snakeCase(validateValue.value)
 
         try {
-            console.log(isNaN(categoryId), 'categoryId')
             if(isNaN(categoryId)){
                 res.status(401).json({
                     success:false,

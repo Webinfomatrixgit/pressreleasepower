@@ -93,7 +93,7 @@ const options = {
     // It will not make modelName plural, default value is false.
     freezeTableName: true,
     // It will not create createdAt and updatedAt columns in table.
-    timestamps: true
+    timestamps: false
 }
 
 module.exports = Articles.init(attributes, options)

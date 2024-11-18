@@ -111,11 +111,11 @@ const attributes = {
 // 3) Create Options for table.
 const options = {
     sequelize: database,
-    modelName: 'user',
+    modelName: 'users',
     // It will not make modelName plural, default value is false.
     freezeTableName: true,
     // It will not create createdAt and updatedAt columns in table.
-    timestamps: true
+    timestamps: false
 }
 
 module.exports = User.init(attributes, options)

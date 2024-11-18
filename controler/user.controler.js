@@ -8,44 +8,54 @@ const changeCaseObject = require('change-case-object')
 module.exports.userGet = async function (req, res) {
     try {
         // Get page number from query params, default to 1 if not provided
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 8; // Set default limit to 8
+        const page = parseInt(req.query.page) || 10;
+        const limit = parseInt(req.query.limit) || 40; // Set default limit to 8
         const offset = (page - 1) * limit; // Calculate offset
         const userId = parseInt(req.query.userId);
-        let findOption;
-        if(userId){
+        let findOption = {
+            where: {
+                id: userId
+            }
+        }
+        if (userId) {
             findOption = {
                 where: {
-                    id: userId 
+                    id: userId
                 },
                 limit,
                 offset
             }
-        }else{
+        } else {
             findOption = {
                 limit,
                 offset
             }
         }
-        try{
-            models.User.findAll(findOption).then(data=> {
-                if(data.length <1 ){
+        try {
+            models.User.findAll(findOption).then(async data => {
+                if (data.length < 1) {
                     res.status(200).json({
                         success: true,
                         message: 'record not found',
                     })
-                }else{
+                } else {
                     data.map(record => {
                         delete record.dataValues.password
                     })
+                    const countData = await models.User.count();
+                    console.log(countData, "countData")
+                    const totalPage = (Math.ceil(countData/10) + countData%10) - 1
                     res.status(200).json({
                         success: true,
-                        message: 'record fetch successfully....',
-                        response: data
+                        message: 'user fetch successfully....',
+                        response: data,
+                        totalUsers: countData,
+                        totalPage
                     })
+
                 }
             })
-        }catch (error){
+        } catch (error) {
             res.status(401).json({
                 success: false,
                 message: `database error: ${error}`
@@ -61,34 +71,34 @@ module.exports.userGet = async function (req, res) {
 
 // Delete User API
 module.exports.userDelete = async function (req, res) {
-    try{
+    try {
         const userId = parseInt(req.query.userId)
 
-        try{
+        try {
             models.User.destroy({
                 where: {
                     id: userId
                 }
             }).then(data => {
-                if(data == 0){
+                if (data == 0) {
                     res.status(401).json({
                         success: false,
                         message: 'record not found'
                     })
-                }else{
+                } else {
                     res.status(200).json({
                         success: true,
                         message: 'record deleted successfully....'
                     })
                 }
             })
-        }catch(error){
+        } catch (error) {
             res.status(401).json({
                 success: false,
                 message: `database error: ${error}`
             })
         }
-    }catch(error){
+    } catch (error) {
         res.status(500).json({
             success: false,
             message: `Exception error: ${error}`
@@ -97,9 +107,9 @@ module.exports.userDelete = async function (req, res) {
 }
 
 // user update API
-module.exports.userUpdate = async function (req,  res){
+module.exports.userUpdate = async function (req, res) {
     // handle exception error
-    try{
+    try {
         const userId = parseInt(req.query.userId)
         const bodyData = req.body
         const validatedObject = Joi.object({
@@ -151,29 +161,29 @@ module.exports.userUpdate = async function (req,  res){
             }
         }
         //Handle for database error
-        try{
-            models.User.update(validatedValues, {where: {id: userId}}).then(data => {
-                console.log(data[0],'updated data')
-                if(data[0] < 1 ) {
+        try {
+            models.User.update(validatedValues, { where: { id: userId } }).then(data => {
+                console.log(data[0], 'updated data')
+                if (data[0] < 1) {
                     res.status(401).json({
-                        success:false,
+                        success: false,
                         message: 'record not found'
                     })
-                }else{
+                } else {
                     res.status(200).json({
                         success: true,
                         message: 'record updated successfully'
                     })
                 }
             })
-        }catch(error){
+        } catch (error) {
             res.status(401).json({
                 success: false,
                 message: `database error: ${error}`
             })
         }
 
-    }catch(error) {
+    } catch (error) {
         res.status(500).json({
             success: false,
             message: `Exception error: ${error}`
